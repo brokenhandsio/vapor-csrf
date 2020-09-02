@@ -76,6 +76,15 @@ let context = MyPageContext(csrfToken: csrfToken)
 return req.view.render("myPage", context)
 ```
 
+You then need to return the token when the form is submitted. With Leaf, this would look something like:
+
+```html
+<form method="post">
+    <input type="hidden" name="csrfToken" value="#(csrfToken)">
+    <input type="submit" value="Submit">
+</form>
+```
+
 ### POST routes
 
 You can protect your POST routes either with Middleware or manually verifying the token.
