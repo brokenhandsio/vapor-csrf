@@ -17,12 +17,13 @@ final class CSRFTests: XCTestCase {
         app.views.use { _ in
             self.viewRenderer
         }
-        app.get("form") { req -> EventLoopFuture<View> in
+        let protectedRoutes = app.grouped(CSRFMiddleware())
+        protectedRoutes.get("form") { req -> EventLoopFuture<View> in
             let token = req.csrf.storeToken()
             let context = ViewContext(csrfToken: token)
             return req.view.render("page", context)
         }
-        app.post("form") { req -> String in
+        protectedRoutes.post("form") { req -> String in
             return "OK"
         }
         app.post("manualForm") { req -> String in
@@ -57,10 +58,19 @@ final class CSRFTests: XCTestCase {
     func testAccessingPostPageWorksWithToken() throws {
         try app.test(.GET, "form", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
+            guard let cookieHeader = res.headers.first(name: "set-cookie") else {
+                XCTFail()
+                return
+            }
             let context = try XCTUnwrap(viewRenderer.capturedContext as? ViewContext)
             try app.test(.POST, "form", beforeRequest: { postRequest in
                 let content = FormData(csrfToken: context.csrfToken)
                 try postRequest.content.encode(content)
+                if let cookieValue = parseCookieValue(from: cookieHeader) {
+                    var cookies = HTTPCookies()
+                    cookies["vapor-session"] = HTTPCookies.Value(string: cookieValue)
+                    postRequest.headers.cookie = cookies
+                }
             }, afterResponse: { res in
                 XCTAssertEqual(res.status, .ok)
             })
@@ -75,10 +85,19 @@ final class CSRFTests: XCTestCase {
 
         try app.test(.GET, "form", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
+            guard let cookieHeader = res.headers.first(name: "set-cookie") else {
+                XCTFail()
+                return
+            }
             let context = try XCTUnwrap(viewRenderer.capturedContext as? ViewContext)
             try app.test(.POST, "form", beforeRequest: { postRequest in
                 let content = DifferentFormData(aTokenForCSRF: context.csrfToken)
                 try postRequest.content.encode(content)
+                if let cookieValue = parseCookieValue(from: cookieHeader) {
+                    var cookies = HTTPCookies()
+                    cookies["vapor-session"] = HTTPCookies.Value(string: cookieValue)
+                    postRequest.headers.cookie = cookies
+                }
             }, afterResponse: { res in
                 XCTAssertEqual(res.status, .ok)
             })
