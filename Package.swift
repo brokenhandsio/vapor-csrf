@@ -4,12 +4,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "vapor-csrf",
+    name: "VaporCSRF",
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
-            name: "vapor-csrf",
-            targets: ["vapor-csrf"]),
+            name: "VaporCSRF",
+            targets: ["VaporCSRF"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -19,10 +19,10 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
-            name: "vapor-csrf",
+            name: "VaporCSRF",
             dependencies: []),
         .testTarget(
-            name: "vapor-csrfTests",
-            dependencies: ["vapor-csrf"]),
+            name: "VaporCSRFTests",
+            dependencies: ["VaporCSRF"]),
     ]
 )
