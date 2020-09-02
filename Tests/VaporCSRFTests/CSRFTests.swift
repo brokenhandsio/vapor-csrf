@@ -16,8 +16,9 @@ final class CSRFTests: XCTestCase {
         app.views.use { _ in
             self.viewRenderer
         }
-        app.get("form") { req -> String in
-            return "OK"
+        app.get("form") { req -> EventLoopFuture<View> in
+            let context = ViewContext(csrfToken: "sometoken")
+            return req.view.render("page", context)
         }
         app.post("form") { req -> String in
             return "OK"
@@ -32,6 +33,12 @@ final class CSRFTests: XCTestCase {
     func testGettingForm() throws {
         try app.test(.GET, "form", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
+            let context1 = try XCTUnwrap(viewRenderer.capturedContext as? ViewContext)
+            try app.test(.GET, "form", afterResponse: { res in
+                XCTAssertEqual(res.status, .ok)
+                let context2 = try XCTUnwrap(viewRenderer.capturedContext as? ViewContext)
+                XCTAssertNotEqual(context1.csrfToken, context2.csrfToken)
+            })
         })
     }
 }
