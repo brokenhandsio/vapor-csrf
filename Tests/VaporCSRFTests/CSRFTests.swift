@@ -30,7 +30,7 @@ final class CSRFTests: XCTestCase {
         try self.eventLoopGroup.syncShutdownGracefully()
     }
 
-    func testGettingForm() throws {
+    func testGettingFormProvidesAUniqueToken() throws {
         try app.test(.GET, "form", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
             let context1 = try XCTUnwrap(viewRenderer.capturedContext as? ViewContext)
@@ -38,6 +38,25 @@ final class CSRFTests: XCTestCase {
                 XCTAssertEqual(res.status, .ok)
                 let context2 = try XCTUnwrap(viewRenderer.capturedContext as? ViewContext)
                 XCTAssertNotEqual(context1.csrfToken, context2.csrfToken)
+            })
+        })
+    }
+
+    func testAccessingPostPageWithoutTokenReturnsError() throws {
+        try app.test(.POST, "form", afterResponse: { res in
+            XCTAssertEqual(res.status, .badRequest)
+        })
+    }
+
+    func testAccessingPostPageWorksWithToken() throws {
+        try app.test(.GET, "form", afterResponse: { res in
+            XCTAssertEqual(res.status, .ok)
+            let context = try XCTUnwrap(viewRenderer.capturedContext as? ViewContext)
+            try app.test(.POST, "form", beforeRequest: { postRequest in
+                let content = FormData(csrfToken: context.csrfToken)
+                try postRequest.content.encode(content)
+            }, afterResponse: { res in
+                XCTAssertEqual(res.status, .ok)
             })
         })
     }
