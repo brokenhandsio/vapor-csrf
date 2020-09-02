@@ -25,6 +25,7 @@ let package = Package(
             name: "VaporCSRF",
             dependencies: [
             .product(name: "Vapor", package: "vapor"),
+            .product(name: "XCTVapor", package: "vapor"),
         ]),
         .testTarget(
             name: "VaporCSRFTests",

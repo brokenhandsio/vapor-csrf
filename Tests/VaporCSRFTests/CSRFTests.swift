@@ -1,5 +1,7 @@
 import XCTest
-@testable import VaporCSRF
+import VaporCSRF
+import Vapor
+import XCTVapor
 
 final class CSRFTests: XCTestCase {
     func testExample() {
