@@ -6,15 +6,27 @@ import XCTVapor
 final class CSRFTests: XCTestCase {
 
     var app: Application!
+    var viewRenderer: CapturingViewRenderer!
+    var eventLoopGroup: EventLoopGroup!
 
     override func setUpWithError() throws {
-        app = Application(.testing)
+        eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        viewRenderer = CapturingViewRenderer(eventLoop: eventLoopGroup.next())
+        app = Application(.testing, .shared(eventLoopGroup))
+        app.views.use { _ in
+            self.viewRenderer
+        }
         app.get("form") { req -> String in
             return "OK"
         }
         app.post("form") { req -> String in
             return "OK"
         }
+    }
+
+    override func tearDownWithError() throws {
+        self.app.shutdown()
+        try self.eventLoopGroup.syncShutdownGracefully()
     }
 
     func testGettingForm() throws {
