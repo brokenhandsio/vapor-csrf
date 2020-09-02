@@ -11,6 +11,16 @@ extension Request {
             self.req.session.data[csrfSessionKey] = csrfToken
             return csrfToken
         }
+
+        public func verifyToken() throws {
+            guard let storedToken = self.req.session.data[csrfSessionKey] else {
+                throw Abort(.badRequest)
+            }
+            self.req.session.data[csrfSessionKey] = nil
+            guard let providedToken = try? self.req.content.get(String.self, at: "csrfToken"), providedToken == storedToken else {
+                throw Abort(.badRequest)
+            }
+        }
     }
 
     public var csrf: CSRF {
