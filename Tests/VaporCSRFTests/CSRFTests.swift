@@ -23,6 +23,9 @@ final class CSRFTests: XCTestCase {
         app.post("form") { req -> String in
             return "OK"
         }
+        app.post("manualForm") { req -> String in
+            return "OK"
+        }
     }
 
     override func tearDownWithError() throws {
@@ -53,6 +56,37 @@ final class CSRFTests: XCTestCase {
             XCTAssertEqual(res.status, .ok)
             let context = try XCTUnwrap(viewRenderer.capturedContext as? ViewContext)
             try app.test(.POST, "form", beforeRequest: { postRequest in
+                let content = FormData(csrfToken: context.csrfToken)
+                try postRequest.content.encode(content)
+            }, afterResponse: { res in
+                XCTAssertEqual(res.status, .ok)
+            })
+        })
+    }
+
+    func testAccessingPostPageUsingCustomCSRFKey() throws {
+        struct DifferentFormData: Content {
+            static let defaultContentType: HTTPMediaType = .urlEncodedForm
+            let aTokenForCSRF: String
+        }
+
+        try app.test(.GET, "form", afterResponse: { res in
+            XCTAssertEqual(res.status, .ok)
+            let context = try XCTUnwrap(viewRenderer.capturedContext as? ViewContext)
+            try app.test(.POST, "form", beforeRequest: { postRequest in
+                let content = DifferentFormData(aTokenForCSRF: context.csrfToken)
+                try postRequest.content.encode(content)
+            }, afterResponse: { res in
+                XCTAssertEqual(res.status, .ok)
+            })
+        })
+    }
+
+    func testManualVerifyOfCSRFToken() throws {
+        try app.test(.GET, "form", afterResponse: { res in
+            XCTAssertEqual(res.status, .ok)
+            let context = try XCTUnwrap(viewRenderer.capturedContext as? ViewContext)
+            try app.test(.POST, "manualForm", beforeRequest: { postRequest in
                 let content = FormData(csrfToken: context.csrfToken)
                 try postRequest.content.encode(content)
             }, afterResponse: { res in
