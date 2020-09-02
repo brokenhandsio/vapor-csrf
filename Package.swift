@@ -24,11 +24,13 @@ let package = Package(
         .target(
             name: "VaporCSRF",
             dependencies: [
-            .product(name: "Vapor", package: "vapor"),
-            .product(name: "XCTVapor", package: "vapor"),
-        ]),
+                .product(name: "Vapor", package: "vapor"),
+            ]),
         .testTarget(
             name: "VaporCSRFTests",
-            dependencies: ["VaporCSRF"]),
+            dependencies: [
+                "VaporCSRF",
+                .product(name: "XCTVapor", package: "vapor"),
+            ]),
     ]
 )
