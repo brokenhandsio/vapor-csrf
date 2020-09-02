@@ -17,7 +17,7 @@ extension Request {
                 throw Abort(.badRequest)
             }
             self.req.session.data[csrfSessionKey] = nil
-            guard let providedToken = try? self.req.content.get(String.self, at: "csrfToken"), providedToken == storedToken else {
+            guard let providedToken = try? self.req.content.get(String.self, at: req.application.csrf.tokenContentKey), providedToken == storedToken else {
                 throw Abort(.badRequest)
             }
         }
@@ -25,5 +25,42 @@ extension Request {
 
     public var csrf: CSRF {
         return CSRF(req: self)
+    }
+}
+
+extension Application {
+    public struct CSRF {
+        let application: Application
+        public var tokenContentKey: String {
+            self.storage.tokenContentKey
+        }
+
+        public func setTokenContentKey(_ newKey: String) {
+            self.storage.tokenContentKey = newKey
+        }
+
+        final class Storage {
+            var tokenContentKey: String
+            init() {
+                tokenContentKey = "csrfToken"
+            }
+        }
+
+        struct Key: StorageKey {
+            typealias Value = Storage
+        }
+
+        var storage: Storage {
+            if let storage = self.application.storage[Key.self] {
+                return storage
+            } else {
+                let storage = Storage()
+                self.application.storage[Key.self] = storage
+                return storage
+            }
+        }
+    }
+    public var csrf: CSRF {
+        return CSRF(application: self)
     }
 }

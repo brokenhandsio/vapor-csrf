@@ -82,6 +82,7 @@ final class CSRFTests: XCTestCase {
             static let defaultContentType: HTTPMediaType = .urlEncodedForm
             let aTokenForCSRF: String
         }
+        app.csrf.setTokenContentKey("aTokenForCSRF")
 
         try app.test(.GET, "form", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
