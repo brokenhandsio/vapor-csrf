@@ -13,11 +13,13 @@ final class CSRFTests: XCTestCase {
         eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         viewRenderer = CapturingViewRenderer(eventLoop: eventLoopGroup.next())
         app = Application(.testing, .shared(eventLoopGroup))
+        app.middleware.use(app.sessions.middleware)
         app.views.use { _ in
             self.viewRenderer
         }
         app.get("form") { req -> EventLoopFuture<View> in
-            let context = ViewContext(csrfToken: "sometoken")
+            let token = req.csrf.storeToken()
+            let context = ViewContext(csrfToken: token)
             return req.view.render("page", context)
         }
         app.post("form") { req -> String in
