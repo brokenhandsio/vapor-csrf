@@ -44,10 +44,65 @@ Also ensure you add it as a dependency to your target:
 targets: [
     .target(name: "App", dependencies: [
         .product(name: "Vapor", package: "vapor"), 
-        ..., 
+        // ..., 
         "VaporCSRF"]),
     // ...
 ]
 ```
 
 ## Usage
+
+You must be using the `SessionsMiddleware` on all routes you interact with CSRF with. You can enable this globally in **configure.swift** with:
+
+```swift
+app.middleware.use(app.sessions.middleware)
+```
+
+For more information on sessions, [see the documentation](https://docs.vapor.codes/4.0/sessions/).
+
+### GET routes
+
+In GET routes that could return a POST request you want to protect, store a CSRF token in the session:
+
+```swift
+let csrfToken = req.csrf.storeToken()
+```
+
+This function returns a token you can then pass to your HTML page. For example, with Leaf this would look like:
+
+```swift
+let csrfToken = req.csrf.storeToken()
+let context = MyPageContext(csrfToken: csrfToken)
+return req.view.render("myPage", context)
+```
+
+### POST routes
+
+You can protect your POST routes either with Middleware or manually verifying the token.
+
+#### Middleware
+
+VaporCSRF provides a middleware that checks the token for you. You can apply this to your routes with:
+
+```swift
+let csrfTokenPotectedRoutes = app.grouped(CSRFMiddleware())
+```
+
+#### Manual Verification
+
+If you want to control when you verify the CSRF token, you can do this manually in your route handler with `try req.csrf.verifyToken()`. E.g.:
+
+```swift
+app.post("myForm") { req -> EventLoopFuture<Response> in
+    try req.csrf.verifyToken()
+    // ...
+}
+```
+
+### Configuration
+
+By default, VaporCSRF looks for a value with the key `csrfToken` in the POST body. You can change the key with:
+
+```swift
+app.csrf.setTokenContentKey("aDifferentKey")
+```
