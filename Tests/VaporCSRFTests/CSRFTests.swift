@@ -127,6 +127,27 @@ final class CSRFTests: XCTestCase {
         })
     }
 
+    func testProvidingWrongTokenReturnsBadRequest() throws {
+        try app.test(.GET, "form", afterResponse: { res in
+            XCTAssertEqual(res.status, .ok)
+            guard let cookieHeader = res.headers.first(name: "set-cookie") else {
+                XCTFail()
+                return
+            }
+            try app.test(.POST, "form", beforeRequest: { postRequest in
+                let content = FormData(csrfToken: "some-random-wrong-token")
+                try postRequest.content.encode(content)
+                if let cookieValue = parseCookieValue(from: cookieHeader) {
+                    var cookies = HTTPCookies()
+                    cookies["vapor-session"] = HTTPCookies.Value(string: cookieValue)
+                    postRequest.headers.cookie = cookies
+                }
+            }, afterResponse: { res in
+                XCTAssertEqual(res.status, .badRequest)
+            })
+        })
+    }
+
     private func parseCookieValue(from cookieString: String) -> String? {
         guard let cookiePart = cookieString.split(separator: ";").first else {
             return nil
