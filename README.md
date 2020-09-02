@@ -1,5 +1,22 @@
 # Vapor CSRF
 
+<p align="center">
+    <a href="https://vapor.codes">
+        <img src="http://img.shields.io/badge/Vapor-4-brightgreen.svg" alt="Language">
+    </a>
+    <a href="https://swift.org">
+        <img src="http://img.shields.io/badge/Swift-5.2-brightgreen.svg" alt="Language">
+    </a>
+    <a href="https://github.com/brokenhandsio/vapor-csrf/actions">
+         <img src="https://github.com/brokenhandsio/vapor-csrf/workflows/CI/badge.svg?branch=main" alt="Build Status">
+    <a href="https://codecov.io/gh/brokenhandsio/vapor-csrf">
+        <img src="https://codecov.io/gh/brokenhandsio/vapor-csrf/branch/main/graph/badge.svg" alt="Code Coverage">
+    </a>
+    <a href="https://raw.githubusercontent.com/brokenhandsio/vapor-csrf/main/LICENSE">
+        <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
+    </a>
+</p>
+
 A simple library for protecting POST requests from CSRF (cross-site request forgery) attacks.
 
 ## What is CSRF?
