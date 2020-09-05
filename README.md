@@ -24,11 +24,11 @@ A simple library for protecting POST requests from CSRF (cross-site request forg
 
 ## What is CSRF?
 
-In simple terms it's tricking a user into making requests that a web application accepts. Imagine a bank website that has a POST request to transfer money into an account. If a malicious site can force the user to send that POST request (when they're logged in) that an attacker could trick a user into transferring money. 
+In simple terms it's tricking a user into making requests that a web application accepts. Imagine a bank website that has a POST request to transfer money into an account. If a malicious site can force the user to send that POST request (when they're logged in) then an attacker could trick a user into transferring money. 
 
-CSRF tokens protects against this by ensuring the POST request is legitimate. The website provides a token to the GET request which is then checks when handling the POST request to ensure it matches.
+CSRF tokens protects against this by ensuring the POST request is legitimate. The website provides a token to the GET request which it then checks when handling the POST request to ensure it matches.
 
-Modern solutions such as [SameSite cookies]() provide a similar protection but aren't supported on all browsers.
+Modern solutions such as [SameSite cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite) provide a similar protection but aren't supported on all browsers.
 
 ## Installation
 
